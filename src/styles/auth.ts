@@ -2,7 +2,6 @@ export interface User {
   uid: string;
   email: string | null;
 }
-
 export interface AuthContextType {
   user: User | null;
   loading: boolean;

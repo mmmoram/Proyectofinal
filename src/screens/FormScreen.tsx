@@ -62,10 +62,10 @@ export default function FormScreen() {
    const handleAiAnalysis = async (base64: string) => {
     setIsAnalyzing(true);
     try {
-      // 🧠 ANÁLISIS CON IA DE ALTA PRECISIÓN
+     
       const aiData = await analyzePetImage(base64);
       
-      // ✅ LLENAMOS LOS CAMPOS CON DATOS SEGUROS
+      
       setForm(prev => ({
         ...prev,
         species: aiData.species.trim(),

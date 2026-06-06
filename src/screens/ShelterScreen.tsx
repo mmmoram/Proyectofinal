@@ -16,7 +16,7 @@ export default function ShelterScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ ELIMINAMOS TODO LO DE GEMINI Y CLAVES, USAMOS DATOS REALES
+    //  USAMOS DATOS REALES
     const fetchShelters = async () => {
       try {
         

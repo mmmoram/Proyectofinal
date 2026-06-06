@@ -99,7 +99,9 @@ export default function DetailScreen() {
               <View style={{ 
                 paddingHorizontal: 12, paddingVertical: 6, 
                 backgroundColor: pet.status === 'Rescatado' ? '#D1FAE5' : '#FEF3C7',
-                borderRadius: 10
+                borderRadius: 10,
+                marginLeft: 10,   
+                marginRight: 0 
               }}>
                 <Text style={{ 
                   color: pet.status === 'Rescatado' ? '#059669' : '#D97706', 

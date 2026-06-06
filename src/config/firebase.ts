@@ -1,35 +1,37 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getStorage } from "firebase/storage";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, getAuth } from "firebase/auth";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
 
-// ✅ CONFIGURACIÓN CORRECTA Y COMPLETA
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAFsJ-SYJjjhBD46oM1foKAYQxzX9eLy4g",
-  authDomain: "base-1b77f.firebaseapp.com",
-  databaseURL: "https://base-1b77f.firebaseio.com",
-  projectId: "base-1b77f",
-  storageBucket: "base-1b77f.firebasestorage.app",
-  messagingSenderId: "128956149429",
-  appId: "1:128956149429:web:29802abc93ef3b5c0fd8fc"
+  apiKey: "AIzaSyDdMEocfdhlskp6yAQ7HYKI934Vxn44_Ds",
+  authDomain: "semana5db.firebaseapp.com",
+  projectId: "semana5db",
+  storageBucket: "semana5db.firebasestorage.app",
+  messagingSenderId: "241602209671",
+  appId: "1:241602209671:web:184b6ca32968d872039522",
+  databaseURL: "https://semana5db-default-rtdb.firebaseio.com/"
 };
 
-// ✅ INICIALIZAR FIREBASE
-export const app = initializeApp(firebaseConfig);
+//  FIREBASE
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ AUTENTICACIÓN CON PERSISTENCIA (FUNCIONA EN EXPO)
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+//AUTENTICACIÓN CON PERSISTENCIA
+let _auth;
+try {
+  _auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+} catch {
+  _auth = getAuth(app);
+}
+export const auth = _auth;
 
-// ✅ BASE DE DATOS EN TIEMPO REAL
+// BASE DE DATOS EN TIEMPO REAL
 export const db = getDatabase(app);
 
-// ✅ ALMACENAMIENTO DE ARCHIVOS
+// ALMACENAMIENTO DE ARCHIVOS
 export const storage = getStorage(app);
 export const WEB_CLIENT_ID = "128956149429-29802abc93ef3b5c0fd8fc.apps.googleusercontent.com";
-export const REDIRECT_URI = AuthSession.makeRedirectUri({
-  useProxy: true // 👈 EL MISMO NOMBRE DE ARRIBA
-} as any);
+export const REDIRECT_URI = AuthSession.makeRedirectUri();

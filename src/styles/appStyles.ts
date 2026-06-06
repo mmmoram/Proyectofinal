@@ -4,11 +4,11 @@ const { width } = Dimensions.get('window');
 
 export const COLORS = {
   background: '#F8FAFC',
-  primary: '#6366F1', // Indigo modern
+  primary: '#6366F1', 
   primaryLight: '#EEF2FF',
-  secondary: '#10B981', // Emerald
+  secondary: '#10B981',
   secondaryLight: '#ECFDF5',
-  accent: '#F59E0B', // Amber
+  accent: '#F59E0B', 
   textPrimary: '#0F172A',
   textSecondary: '#64748B',
   white: '#FFFFFF',

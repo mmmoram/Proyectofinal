@@ -4,7 +4,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
 import { StackNavigator } from './src/navigation/StackNavigator';
 import { getDB } from './src/database/database';
-// 👇 Importamos tu proveedor de autenticación
 import { AuthProvider } from './src/context/AuthContext'; 
 
 export default function App() {
@@ -19,7 +18,7 @@ export default function App() {
         setIsDbReady(true);
       } catch (e) {
         console.error("Error inicializando la base de datos:", e);
-        // Aún así permitimos que la app inicie para que el usuario vea algo
+       
         setIsDbReady(true); 
       }
     }
@@ -36,7 +35,6 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      {/* ✅ ENVOLVEMOS TODA LA NAVEGACIÓN EN EL AUTHPROVIDER */}
       <AuthProvider>
         <NavigationContainer>
           <StackNavigator />

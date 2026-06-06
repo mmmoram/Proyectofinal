@@ -1,18 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/typesNavigation';
 import { appStyles, COLORS } from '../styles/appStyles';
 import { petService } from '../services/petService';
+import { useAuth } from '../context/AuthContext';
+import { NavigationProps } from '../navigation/typesNavigation';
 
 export default function ProfileScreen() {
+  const { user, logout } = useAuth();
   const navigation = useNavigation<NavigationProps>();
   const [reportCount, setReportCount] = useState(0);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const loadUserData = async () => {
-    // En un flujo real, aquí llamarías a getAuth() de Firebase.
-    // Para la gamificación local, contamos los registros en SQLite.
     const allPets = await petService.getAllPets();
     setReportCount(allPets.length);
   };
@@ -23,32 +24,60 @@ export default function ProfileScreen() {
     }, [])
   );
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro de que deseas cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar Sesión',
+          style: 'destructive',
+          onPress: async () => {
+            setIsLoggingOut(true);
+            try {
+              await logout();
+              navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+            } catch {
+              Alert.alert('Error', 'No se pudo cerrar la sesión. Intenta nuevamente.');
+              setIsLoggingOut(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const getBadge = (count: number) => {
-    if (count >= 10) return { title: 'Héroe de 4 Patas 🦸‍♂️', color: '#F59E0B' }; // Gold
+    if (count >= 10) return { title: 'Héroe de 4 Patas 🦸‍♂️', color: '#F59E0B' };
     if (count >= 5) return { title: 'Rescatista Activo 🛡️', color: COLORS.primary };
     return { title: 'Novato 🌱', color: COLORS.secondary };
   };
 
   const badge = getBadge(reportCount);
+  const displayEmail = user?.email ?? 'usuario@huellas.com';
+  const displayName = displayEmail.split('@')[0];
 
   return (
     <SafeAreaView style={appStyles.container}>
       <ScrollView contentContainerStyle={appStyles.content}>
         <View style={[appStyles.card, { alignItems: 'center', paddingVertical: 40 }]}>
-          <Image 
-            source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }} 
+          <Image
+            source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
             style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 16 }}
           />
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: COLORS.textPrimary }}>Usuario Solidario</Text>
-          <Text style={{ fontSize: 16, color: COLORS.textSecondary, marginBottom: 24 }}>usuario@huellas.com</Text>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: COLORS.textPrimary, textTransform: 'capitalize' }}>
+            {displayName}
+          </Text>
+          <Text style={{ fontSize: 16, color: COLORS.textSecondary, marginBottom: 24 }}>{displayEmail}</Text>
 
-          <View style={{ 
-            backgroundColor: badge.color + '20', // 20% opacity
-            paddingHorizontal: 20, 
-            paddingVertical: 10, 
+          <View style={{
+            backgroundColor: badge.color + '20',
+            paddingHorizontal: 20,
+            paddingVertical: 10,
             borderRadius: 20,
             borderWidth: 1,
-            borderColor: badge.color
+            borderColor: badge.color,
           }}>
             <Text style={{ color: badge.color, fontWeight: '800', fontSize: 16 }}>
               {badge.title}
@@ -71,18 +100,15 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[appStyles.buttonPrimary, { backgroundColor: COLORS.danger, marginTop: 40, marginBottom: 20 }]}
-          onPress={() => {
-            // Aquí iría el logout de Firebase si se estuviera usando Auth.
-            // navigation.dispatch(StackActions.replace('Login')) o similar.
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
-          }}
+          onPress={handleLogout}
+          disabled={isLoggingOut}
         >
-          <Text style={appStyles.buttonText}>Cerrar Sesión</Text>
+          {isLoggingOut
+            ? <ActivityIndicator color={COLORS.white} />
+            : <Text style={appStyles.buttonText}>Cerrar Sesión</Text>
+          }
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

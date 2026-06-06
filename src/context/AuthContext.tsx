@@ -77,14 +77,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Mensajes de error amigables
+  // 
   const getErrorMessage = (code: string): string => {
     switch (code) {
+      // Firebase 
+      case 'auth/invalid-credential':
+      case 'auth/invalid-login-credentials':
+        return 'Correo o contraseña incorrectos';
       case 'auth/user-not-found': return 'Usuario no encontrado';
       case 'auth/wrong-password': return 'Contraseña incorrecta';
       case 'auth/email-already-in-use': return 'El correo ya está registrado';
       case 'auth/invalid-email': return 'Correo inválido';
-      default: return 'Ocurrió un error, intenta nuevamente';
+      case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres';
+      case 'auth/too-many-requests': return 'Demasiados intentos fallidos. Intenta más tarde';
+      case 'auth/network-request-failed': return 'Sin conexión a internet';
+      case 'auth/user-disabled': return 'Esta cuenta ha sido deshabilitada';
+      default:
+        console.warn('Firebase auth error code no manejado:', code);
+        return 'Ocurrió un error, intenta nuevamente';
     }
   };
 
