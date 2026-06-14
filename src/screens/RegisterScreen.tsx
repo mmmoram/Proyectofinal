@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ImageBackground, ScrollView } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, Alert, KeyboardAvoidingView,
+  Platform, ScrollView, ActivityIndicator,
+} from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../config/firebase';
 import { updateProfile } from 'firebase/auth';
@@ -13,230 +17,223 @@ const RegisterScreen = ({ navigation }: any) => {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('❌ Error', 'Por favor completa todos los campos');
+      Alert.alert('Campos incompletos', 'Por favor completa todos los campos.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('❌ Error', 'La contraseña debe tener al menos 6 caracteres');
+      Alert.alert('Contraseña corta', 'Debe tener al menos 6 caracteres.');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('❌ Error', 'Las contraseñas no coinciden');
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
       return;
     }
-
     try {
       await register(email, password);
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, { displayName: name });
       }
-      Alert.alert('✅ ¡Bienvenido!', 'Tu cuenta ha sido creada exitosamente', [
-        { text: 'Iniciar Sesión', onPress: () => navigation.navigate('Login') }
+      Alert.alert('¡Bienvenido!', 'Cuenta creada exitosamente.', [
+        { text: 'Iniciar Sesión', onPress: () => navigation.navigate('Login') },
       ]);
     } catch (err: any) {
-      Alert.alert('❌ Error', err.message);
+      Alert.alert('Error al registrarse', err.message);
     }
   };
 
   return (
-    <ImageBackground 
-      source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3648/3648851.png' }} 
-      style={styles.backgroundImage}
-      resizeMode="repeat"
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.overlay}>
-          <View style={styles.innerContainer}>
-            {/* Encabezado */}
-            <View style={styles.headerContainer}>
-              <Image
-                source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-              <Text style={styles.title}>Únete a la Familia</Text>
-              <Text style={styles.subtitle}>Crea tu cuenta y ayuda a salvar vidas</Text>
-            </View>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-            {/* Formulario */}
-            <View style={styles.formContainer}>
-              <View style={styles.inputWrapper}>
-                <Text style={styles.label}>Nombre Completo</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ej: María López"
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                  placeholderTextColor="#94A3B8"
-                />
-              </View>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <View style={styles.iconWrap}>
+            <Text style={styles.iconEmoji}>📝</Text>
+          </View>
+          <Text style={styles.appName}>MisRecetas</Text>
+          <Text style={styles.tagline}>Crea tu cuenta y empieza a cocinar</Text>
+        </View>
 
-              <View style={styles.inputWrapper}>
-                <Text style={styles.label}>Correo Electrónico</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="ejemplo@correo.com"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  placeholderTextColor="#94A3B8"
-                />
-              </View>
+        {/* Card formulario */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Crear Cuenta</Text>
 
-              <View style={styles.inputWrapper}>
-                <Text style={styles.label}>Contraseña</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  placeholderTextColor="#94A3B8"
-                />
-              </View>
+          <Text style={styles.label}>Nombre completo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: María López"
+            placeholderTextColor="#94A3B8"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+          />
 
-              <View style={styles.inputWrapper}>
-                <Text style={styles.label}>Confirmar Contraseña</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Repite tu contraseña"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  placeholderTextColor="#94A3B8"
-                />
-              </View>
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ejemplo@correo.com"
+            placeholderTextColor="#94A3B8"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
 
-              {/* Botón Registro */}
-              <TouchableOpacity 
-                style={[styles.primaryButton, loading && styles.buttonDisabled]} 
-                onPress={handleRegister} 
-                disabled={loading}
-              >
-                <Text style={styles.primaryButtonText}>
-                  {loading ? "Creando cuenta..." : "Crear mi cuenta"}
-                </Text>
-              </TouchableOpacity>
+          <Text style={styles.label}>Contraseña</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Mínimo 6 caracteres"
+            placeholderTextColor="#94A3B8"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-              {/* Enlace Login */}
-              <View style={styles.loginContainer}>
-                <Text style={styles.textNormal}>¿Ya tienes cuenta? </Text>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Text style={styles.textLink}>Iniciar sesión</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+          <Text style={styles.label}>Confirmar contraseña</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Repite tu contraseña"
+            placeholderTextColor="#94A3B8"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
+
+          <TouchableOpacity
+            style={[styles.btnPrimary, loading && styles.btnDisabled]}
+            onPress={handleRegister}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            {loading
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.btnText}>Crear cuenta</Text>
+            }
+          </TouchableOpacity>
+
+          <View style={styles.loginRow}>
+            <Text style={styles.grayText}>¿Ya tienes cuenta? </Text>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.linkText}>Iniciar sesión</Text>
+            </TouchableOpacity>
           </View>
         </View>
+
       </ScrollView>
-    </ImageBackground>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  root: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'transparent',
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(248, 250, 252, 0.85)',
-    paddingHorizontal: 25,
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 24,
+    paddingTop: 40,
   },
-  container: {
-    flex: 1,
-  },
-  innerContainer: {
-    paddingBottom: 40,
-  },
-  headerContainer: {
+  hero: {
     alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 40,
+    marginBottom: 32,
   },
-  logo: {
-    width: 70,
-    height: 70,
-    marginBottom: 10,
+  iconWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 24,
+    backgroundColor: '#6366F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.32,
+    shadowRadius: 18,
+    elevation: 10,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#2D5AF0',
-    marginBottom: 4,
+  iconEmoji: { fontSize: 44 },
+  appName: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -1,
   },
-  subtitle: {
+  tagline: {
     fontSize: 14,
     color: '#64748B',
-    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
   },
-  formContainer: {
-    width: '100%',
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 32,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  inputWrapper: {
-    marginBottom: 18,
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 22,
   },
   label: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
     color: '#334155',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     fontSize: 15,
-    color: '#1E293B',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    color: '#0F172A',
+    marginBottom: 18,
   },
-  primaryButton: {
-    backgroundColor: '#2D5AF0',
-    paddingVertical: 15,
-    borderRadius: 12,
+  btnPrimary: {
+    backgroundColor: '#6366F1',
+    borderRadius: 20,
+    paddingVertical: 18,
     alignItems: 'center',
-    marginTop: 5,
-    marginBottom: 20,
-    shadowColor: '#2D5AF0',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    marginTop: 4,
+    marginBottom: 22,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  buttonDisabled: {
-    backgroundColor: '#94A3B8',
+  btnDisabled: {
+    backgroundColor: '#A5B4FC',
     shadowOpacity: 0,
+    elevation: 0,
   },
-  primaryButtonText: {
+  btnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
-  loginContainer: {
+  loginRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  textNormal: {
-    fontSize: 14,
-    color: '#64748B',
-  },
-  textLink: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2D5AF0',
-  },
+  grayText: { fontSize: 14, color: '#64748B' },
+  linkText: { fontSize: 14, fontWeight: '800', color: '#6366F1' },
 });
 
 export default RegisterScreen;

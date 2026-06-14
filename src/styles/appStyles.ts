@@ -1,9 +1,7 @@
-import { StyleSheet, Dimensions } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-  background: '#F8FAFC',
+  background: 'transparent',
   primary: '#6366F1', 
   primaryLight: '#EEF2FF',
   secondary: '#10B981',
